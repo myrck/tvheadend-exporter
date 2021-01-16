@@ -32,8 +32,6 @@ jobs:
       -
         name: Build and push
         uses: docker/build-push-action@v2
-        env:
-          ADDITIONAL_TAG: ${{ steps.tag_release.outputs.tag }}
         with:
           context: .
           file: ./Dockerfile
@@ -41,4 +39,4 @@ jobs:
           push: true
           tags: |
             mcmarkj/tvheadend-exporter:latest
-            mcmarkj/tvheadend-exporter:${ADDITIONAL_TAG}
+            mcmarkj/tvheadend-exporter:${{ steps.tag_release.outputs.tag }}
