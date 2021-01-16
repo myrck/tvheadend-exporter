@@ -33,6 +33,11 @@ class HTSPApi(object):
 
         return found
 
+    def get_input_stats(self, kwargs={}):
+        self.htsp.send('api', {'path': 'status/inputs', 'args': kwargs})
+        msg = self.htsp.recv()
+        return msg['response']['entries']
+
     def get_channels_grid(self, kwargs={}):
         self.htsp.send('api', {'path': 'channel/grid', 'args': kwargs})
         msg = self.htsp.recv()
@@ -167,6 +172,11 @@ class HTSPApi(object):
         })
         msg = self.htsp.recv()
         return msg['response']['entries']
+
+    def get_epg_count(self, kwargs={}):
+        self.htsp.send('api', {'path': 'epg/events/grid', 'args': kwargs})
+        msg = self.htsp.recv()
+        return msg['response']['totalCount']
 
     def get_streams(self, kwargs={}):
         self.htsp.send('api', {'path': 'status/subscriptions', 'args': kwargs})

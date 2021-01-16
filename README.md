@@ -28,17 +28,29 @@ Arguments are:
     # TYPE tvheadend_subscription_count gauge
     tvheadend_subscription_count 1.0
 
-    # HELP tvheadend_active_subscription_start_time Start time for an active connection/stream to the TVHeadend Server
-    # TYPE tvheadend_active_subscription_start_time gauge
-    tvheadend_active_subscription_start_time 1.610810164e+09
-
+    # HELP tvheadend_input_signal Signal Strength for DVB Inputs
+    # TYPE tvheadend_input_signal gauge
+    tvheadend_input_signal{name="Sony CXD2880 #0 : DVB-T #0",stream="570MHz in DVB-T Network"} 1.84467440737095e+19
+    
+    # HELP tvheadend_scrape_duration_seconds Duration of tvheadend scrape
+    # TYPE tvheadend_scrape_duration_seconds gauge
+    tvheadend_scrape_duration_seconds 0.1025688648223877
+    
+    # HELP tvheadend_input_signal_noise_ratio Signal Noise Ratio for DVB Inputs
+    # TYPE tvheadend_input_signal_noise_ratio gauge
+    tvheadend_input_signal_noise_ratio{name="Sony CXD2880 #0 : DVB-T #0",stream="570MHz in DVB-T Network"} 24246.0
+    
     # HELP tvheadend_channel_count Number of channels on the server
     # TYPE tvheadend_channel_count gauge
     tvheadend_channel_count 153.0
-
-    # HELP tvheadend_scrape_duration_seconds Duration of tvheadend scrape
-    # TYPE tvheadend_scrape_duration_seconds gauge
-    tvheadend_scrape_duration_seconds 0.05248594284057617
+    
+    # HELP tvheadend_active_subscription_start_time Start time for an active connection/stream to the TVHeadend Server
+    # TYPE tvheadend_active_subscription_start_time gauge
+    tvheadend_active_subscription_start_time{ip_address="192.168.0.22",title="5STAR"} 1.610814409e+09
+   
+    # HELP tvheadend_epg_count Number of programmes in the EPG
+    # TYPE tvheadend_epg_count gauge
+    tvheadend_epg_count 25491.0
    ```
 
 

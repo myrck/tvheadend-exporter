@@ -16,21 +16,24 @@ class Gauge(prometheus_client.core.GaugeMetricFamily):
 
     NAMESPACE = 'tvheadend'
 
-    def __init__(self, name, documentation):
-        super(Gauge, self).__init__('%s_%s' % (self.NAMESPACE, name), documentation, labels=['ip_address', 'title'])
+    def __init__(self, name, documentation, labels):
+        super(Gauge, self).__init__('%s_%s' % (self.NAMESPACE, name), documentation, labels=labels)
         self._name = name
 
     def clone(self):
-        return type(self)(self._name, self.documentation)
+        return type(self)(self._name, self.documentation, self._labelnames)
 
 
 class tvheadendCollector(object):
     METRICS = {
-        'active_subscription_start_time': Gauge('active_subscription_start_time', 'Start time for an active connection/stream to the TVHeadend Server'),
-        'channel_count': Gauge('channel_count', 'Number of channels on the server'),
-        'subscription_count': Gauge('subscription_count', 'Number of active subscriptions'),
+        'active_subscription_start_time': Gauge('active_subscription_start_time', 'Start time for an active connection/stream to the TVHeadend Server', labels=['ip_address', 'title', 'stream']),
+        'channel_count': Gauge('channel_count', 'Number of channels on the server', labels=[]),
+        'epg_count': Gauge('epg_count', 'Number of programmes in the EPG', labels=[]),
+        'subscription_count': Gauge('subscription_count', 'Number of active subscriptions', labels=[]),
+        'input_signal_noise_ratio': Gauge('input_signal_noise_ratio', 'Signal Noise Ratio for DVB Inputs', labels=['name', 'stream']),
+        'input_signal': Gauge('input_signal', 'Signal Strength for DVB Inputs', labels=['name', 'stream']),
         'scrape_duration_seconds': Gauge(
-            'scrape_duration_seconds', 'Duration of tvheadend scrape'),
+            'scrape_duration_seconds', 'Duration of tvheadend scrape', labels=[]),
     }
 
     def configure(self, server_hostname, server_user, server_pass):
@@ -50,23 +53,28 @@ class tvheadendCollector(object):
             # race conditions with simultaneous scrapes.
             metrics = {
                 key: value.clone() for key, value in self.METRICS.items()}
-
-            labels = [
-                '',
-            ]
             channel_count = self.htspapi.get_channels_count()
             streams = self.htspapi.get_streams()
+            inputs = self.htspapi.get_input_stats()
+            epg_count = self.htspapi.get_epg_count()
+
             metrics['channel_count'].add_metric([], int(channel_count))
+            metrics['epg_count'].add_metric([], int(epg_count))
             metrics['subscription_count'].add_metric([], int(len(streams)))
             for stream in streams:
                 try:
                     hostname = stream['hostname']
                     channel = stream['channel']
                     metrics['active_subscription_start_time'].add_metric([hostname, channel], stream['start'])
-                except:
+                except KeyError:
                     metrics['active_subscription_start_time'].add_metric([], stream['start'])
 
-                print(stream)
+            for dvb_input in inputs:
+                name = dvb_input['input']
+                stream = dvb_input['stream']
+                metrics['input_signal_noise_ratio'].add_metric([name, stream], dvb_input['snr'])
+                metrics['input_signal'].add_metric([name, stream], dvb_input['signal'])
+
             metrics['scrape_duration_seconds'].add_metric([], time.time() - start)
             return metrics.values()
         except Exception:
