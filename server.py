@@ -84,7 +84,7 @@ APP = prometheus_client.make_wsgi_app(REGISTRY)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--host', default='localhost', help='bind host')
+    parser.add_argument('--host', default='0.0.0.0', help='bind host')
     parser.add_argument('--port', default='9429', help='bind port', type=int)
     parser.add_argument('--username', default=os.getenv("TVH_USER"), help='username for authentication')
     parser.add_argument('--password', default=os.getenv("TVH_PASS"), help='password for authentication')

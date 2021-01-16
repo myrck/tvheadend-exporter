@@ -11,6 +11,12 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
+      - name: Tag Release
+        id: tag_release
+        uses: anothrNick/github-tag-action@1.33.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
       -
         name: Set up QEMU
         uses: docker/setup-qemu-action@v1
@@ -26,6 +32,8 @@ jobs:
       -
         name: Build and push
         uses: docker/build-push-action@v2
+        env:
+          ADDITIONAL_TAG: ${{ steps.tag_release.outputs.tag }}
         with:
           context: .
           file: ./Dockerfile
@@ -33,3 +41,4 @@ jobs:
           push: true
           tags: |
             mcmarkj/tvheadend-exporter:latest
+            mcmarkj/tvheadend-exporter:${ADDITIONAL_TAG}

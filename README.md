@@ -3,6 +3,22 @@
 
   <h3 align="center">TVHeadend Prometheus Exporter</h3>
 
+### Running on Docker
+```
+docker run --network=host mcmarkj/tvheadend-exporter:latest
+```
+
+Metrics accessible at http://127.0.0.1:9249
+
+Arguments are:
+```
+    --host  default=0.0.0.0 (bind host - 0.0.0.0 to allow outside connections)
+    --port default='9429' (bind port i.e. what prometheus scrapes)
+    --username (username for authentication, can be set via ENV Var TVH_USER')
+    --password (password for authentication, can be set via ENV Var TVH_PASS)
+    --server (server url for tvheadend, can be set via ENV Var TVH_SERVER)
+```
+
 <!-- Metrics Exporter -->
 
 ### Metrics
