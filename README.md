@@ -1,5 +1,6 @@
 [![Contributors][contributors-shield]][contributors-url]
 [![Contributors][docker-build-shield]][build-url]
+[![Contributors][linting-shield]][linting-url]
 
   <h3 align="center">TVHeadend Prometheus Exporter</h3>
 
@@ -72,3 +73,5 @@ Arguments are:
 [contributors-url]: https://github.com/mcmarkj/tvheadend-exporter/graphs/contributors
 [build-url]: https://github.com/mcmarkj/tvheadend-exporter/actions?query=workflow%3Aci
 [docker-build-shield]: https://img.shields.io/github/workflow/status/mcmarkj/tvheadend-exporter/ci?label=Docker%20Push&style=for-the-badge
+[linting-url]: https://github.com/mcmarkj/tvheadend-exporter/actions?query=workflow%3ALinting
+[linting-shield]: https://img.shields.io/github/workflow/status/mcmarkj/tvheadend-exporter/Linting?label=Flake8&style=for-the-badge

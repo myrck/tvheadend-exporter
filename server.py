@@ -85,12 +85,15 @@ class tvheadendCollector(object):
                         [], stream['start'])
 
             for dvb_input in inputs:
-                name = dvb_input['input']
-                stream = dvb_input['stream']
-                metrics['input_signal_noise_ratio'].add_metric(
-                    [name, stream], dvb_input['snr'])
-                metrics['input_signal'].add_metric(
-                    [name, stream], dvb_input['signal'])
+                try:
+                    name = dvb_input['input']
+                    stream = dvb_input['stream']
+                    metrics['input_signal_noise_ratio'].add_metric(
+                        [name, stream], dvb_input['snr'])
+                    metrics['input_signal'].add_metric(
+                        [name, stream], dvb_input['signal'])
+                except KeyError:
+                    pass
 
             metrics['scrape_duration_seconds'].add_metric(
                 [], time.time() - start)
