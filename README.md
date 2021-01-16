@@ -1,5 +1,5 @@
 [![Contributors][contributors-shield]][contributors-url]
-
+[![Contributors][docker-build-shield]][build-url]
 
   <h3 align="center">TVHeadend Prometheus Exporter</h3>
 
@@ -68,5 +68,7 @@ Arguments are:
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
-[contributors-shield]: https://img.shields.io/github/contributors/github_username/repo.svg?style=for-the-badge
+[contributors-shield]: https://img.shields.io/github/contributors/mcmarkj/tvheadend-exporter.svg?style=for-the-badge
 [contributors-url]: https://github.com/mcmarkj/tvheadend-exporter/graphs/contributors
+[build-url]: https://github.com/mcmarkj/tvheadend-exporter/actions?query=workflow%3Aci
+[docker-build-shield]: https://img.shields.io/github/workflow/status/mcmarkj/tvheadend-exporter/ci?label=Docker%20Push&style=for-the-badge
