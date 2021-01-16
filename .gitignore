@@ -1,0 +1,12 @@
+**/jenkins_db.db
+__pycache__
+**/logs
+.coverage
+htmlcov
+venv
+*.swp
+*~
+.idea
+*.log
+*.DS_Store
+*.egg-info
