@@ -6,6 +6,7 @@ import time
 import wsgiref.simple_server
 
 import prometheus_client.core
+
 from tvh.api import HTSPApi
 from tvh.htsp import HTSPClient
 
@@ -42,10 +43,43 @@ class tvheadendCollector(object):
         'input_signal_noise_ratio': Gauge('input_signal_noise_ratio',
                                           'Signal Noise Ratio for DVB Inputs',
                                           labels=['name', 'stream']),
+        'input_signal_noise_ratio_scale': Gauge(
+            'input_signal_noise_ratio_scale',
+            'A value of 1 indicates that the '
+            'corresponding signal or SNR reading'
+            'is relative',
+            labels=['name', 'stream']),
+        'input_signal_scale': Gauge('input_signal_scale',
+                                    'A value of 1 indicates that the '
+                                    'corresponding signal or SNR reading '
+                                    'is relative',
+                                    labels=['name', 'stream']),
         'input_signal': Gauge('input_signal', 'Signal Strength for DVB Inputs',
                               labels=['name', 'stream']),
+        'input_continuity_errors': Gauge('input_continuity_errors',
+                                         'Continuity Errors for Inputs',
+                                         labels=['name', 'stream']),
+        'dvr_count': Gauge('dvr_count',
+                           'Number of events in the DVR',
+                           labels=["status"]),
+
+        'dvr_start_time': Gauge('dvr_start_time',
+                                'Start time for DVR Event',
+                                labels=["channel_name",
+                                        "programme_title",
+                                        "status", "state"]),
+        'dvr_finish_time': Gauge('dvr_start_time',
+                                 'Finish time for DVR Event',
+                                 labels=["channel_name",
+                                         "programme_title",
+                                         "status", "state"]),
+        'dvr_duration': Gauge('dvr_start_time',
+                              'Duration for DVR Event',
+                              labels=["channel_name",
+                                      "programme_title",
+                                      "status", "state"]),
         'scrape_duration_seconds': Gauge(
-            'scrape_duration_seconds', 'Duration of tvheadend scrape',
+            'scrape_duration_seconds', 'Duration of TVHeadend scrape',
             labels=[]),
     }
 
@@ -66,14 +100,28 @@ class tvheadendCollector(object):
             # race conditions with simultaneous scrapes.
             metrics = {
                 key: value.clone() for key, value in self.METRICS.items()}
-            channel_count = self.htspapi.get_channels_count()
-            streams = self.htspapi.get_streams()
-            inputs = self.htspapi.get_input_stats()
-            epg_count = self.htspapi.get_epg_count()
 
+            # Counts
+            channel_count = self.htspapi.get_channels_count()
+            epg_count = self.htspapi.get_epg_count()
+            dvr_upcoming_count = self.htspapi.get_dvr_count({}, 'upcoming')
+            dvr_finished_count = self.htspapi.get_dvr_count({}, 'finished')
+            dvr_failed_count = self.htspapi.get_dvr_count({}, 'failed')
             metrics['channel_count'].add_metric([], int(channel_count))
             metrics['epg_count'].add_metric([], int(epg_count))
+            metrics['dvr_count'].add_metric(['upcoming'],
+                                            int(dvr_upcoming_count))
+            metrics['dvr_count'].add_metric(['finished'],
+                                            int(dvr_finished_count))
+            metrics['dvr_count'].add_metric(['failed'], int(dvr_failed_count))
+
+            # Arrays
+            streams = self.htspapi.get_streams()
+            inputs = self.htspapi.get_input_stats()
+            dvr = self.htspapi.get_dvr()
+
             metrics['subscription_count'].add_metric([], int(len(streams)))
+            # Iterate through arrays
             for stream in streams:
                 try:
                     hostname = stream['hostname']
@@ -90,10 +138,40 @@ class tvheadendCollector(object):
                     stream = dvb_input['stream']
                     metrics['input_signal_noise_ratio'].add_metric(
                         [name, stream], dvb_input['snr'])
+                    metrics['input_signal_noise_ratio_scale'].add_metric(
+                        [name, stream], dvb_input['snr_scale'])
                     metrics['input_signal'].add_metric(
                         [name, stream], dvb_input['signal'])
+                    metrics['input_signal_scale'].add_metric(
+                        [name, stream], dvb_input['signal_scale'])
+                    metrics['input_continuity_errors'].add_metric(
+                        [name, stream], dvb_input['cc'])
                 except KeyError:
                     pass
+
+                for recording in dvr:
+                    try:
+                        channel_name = recording['channelname']
+                        programme_title = recording['disp_title']
+                        start_timestamp = recording['start']
+                        finish_timestamp = recording['stop']
+                        duration = recording['duration']
+                        status = recording['status']
+                        recording_state = recording['sched_status']
+
+                        metrics['dvr_start_time'].add_metric(
+                            [channel_name, programme_title, status,
+                             recording_state], start_timestamp)
+                        metrics['dvr_finish_time'].add_metric(
+                            [channel_name, programme_title, status,
+                             recording_state], finish_timestamp)
+                        metrics['dvr_duration'].add_metric(
+                            [channel_name, programme_title, status,
+                             recording_state],
+                            duration)
+
+                    except KeyError:
+                        pass
 
             metrics['scrape_duration_seconds'].add_metric(
                 [], time.time() - start)

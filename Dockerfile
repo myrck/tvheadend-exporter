@@ -1,5 +1,7 @@
 FROM python:2.7
 
+ENV TVH_SERVER=127.0.0.1
+
 WORKDIR /code
 
 COPY requirements.txt .

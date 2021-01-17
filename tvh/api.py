@@ -182,3 +182,26 @@ class HTSPApi(object):
         self.htsp.send('api', {'path': 'status/subscriptions', 'args': kwargs})
         msg = self.htsp.recv()
         return msg['response']['entries']
+
+    def get_dvr(self, kwargs={}, state=''):
+        if state == '':
+            path = 'dvr/entry/grid'
+        else:
+            path = 'dvr/entry/grid_'+state
+
+        self.htsp.send('api', {
+            'path': path,
+            'args': kwargs
+        })
+        msg = self.htsp.recv()
+        return msg['response']['entries']
+
+    def get_dvr_count(self, kwargs={}, state=''):
+        if state == '':
+            path = 'dvr/entry/grid'
+        else:
+            path = 'dvr/entry/grid_'+state
+
+        self.htsp.send('api', {'path': path, 'args': kwargs})
+        msg = self.htsp.recv()
+        return msg['response']['total']
