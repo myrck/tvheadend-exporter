@@ -1,12 +1,21 @@
-name: ci
+name: CI
 
-on:
-  push:
-    branches: master
+on: [push]
 
 jobs:
-  multi:
+  linting:
+    runs-on: ubuntu-18.04
+    name: Linting
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '2.7'
+      - uses: whynothugo/python-linting@master
+
+  deploy:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     steps:
       -
         name: Checkout

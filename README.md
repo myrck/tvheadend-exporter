@@ -1,6 +1,5 @@
 [![Contributors][contributors-shield]][contributors-url]
 [![Contributors][docker-build-shield]][build-url]
-[![Contributors][linting-shield]][linting-url]
 
   <h3 align="center">TVHeadend Prometheus Exporter</h3>
 
@@ -14,7 +13,7 @@ Metrics accessible at http://127.0.0.1:9249
 Arguments are:
 ```
     --host  default=0.0.0.0 (bind host - 0.0.0.0 to allow outside connections)
-    --port default='9429' (bind port i.e. what prometheus scrapes)
+    --port default='9429' (bind portgi i.e. what prometheus scrapes)
     --username (username for authentication, can be set via ENV Var TVH_USER')
     --password (password for authentication, can be set via ENV Var TVH_PASS)
     --server (server url for tvheadend, can be set via ENV Var TVH_SERVER)
@@ -106,6 +105,4 @@ tvheadend_epg_count 25308.0
 [contributors-shield]: https://img.shields.io/github/contributors/mcmarkj/tvheadend-exporter.svg?style=for-the-badge
 [contributors-url]: https://github.com/mcmarkj/tvheadend-exporter/graphs/contributors
 [build-url]: https://github.com/mcmarkj/tvheadend-exporter/actions?query=workflow%3Aci
-[docker-build-shield]: https://img.shields.io/github/workflow/status/mcmarkj/tvheadend-exporter/ci?label=Docker%20Push&style=for-the-badge
-[linting-url]: https://github.com/mcmarkj/tvheadend-exporter/actions?query=workflow%3ALinting
-[linting-shield]: https://img.shields.io/github/workflow/status/mcmarkj/tvheadend-exporter/Linting?label=Flake8&style=for-the-badge
+[docker-build-shield]: https://img.shields.io/github/workflow/status/mcmarkj/tvheadend-exporter/ci?label=CI%20CD&style=for-the-badge

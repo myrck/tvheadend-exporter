@@ -5,8 +5,7 @@ import sys
 import time
 import wsgiref.simple_server
 
-import prometheus_client.core
-
+import prometheus_client.coregi
 from tvh.api import HTSPApi
 from tvh.htsp import HTSPClient
 
