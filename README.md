@@ -5,7 +5,7 @@
 
 ### Running on Docker
 ```
-docker run --network=host mcmarkj/tvheadend-exporter:latest
+docker run --network=host ghcr.io/0x4d4d/tvheadend-exporter:latest
 ```
 
 Metrics accessible at http://127.0.0.1:9429
