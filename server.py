@@ -1,4 +1,5 @@
 import argparse
+import base64
 import logging
 import os.path
 import sys
@@ -6,8 +7,8 @@ import time
 import wsgiref.simple_server
 
 import prometheus_client.core
-from tvh.api import HTSPApi
-from tvh.htsp import HTSPClient
+from http.client import HTTPConnection
+from tvh.api import HTMLApi
 
 log = logging.getLogger(__name__)
 LOG_FORMAT = '%(asctime)s %(levelname)-5.5s [%(name)s] %(message)s'
@@ -82,11 +83,15 @@ class tvheadendCollector(object):
             labels=[]),
     }
 
-    def configure(self, server_hostname, server_user, server_pass):
-        htsp = HTSPClient((server_hostname, 9982))
-        htsp.hello()
-        htsp.authenticate(server_user, server_pass)
-        self.htspapi = HTSPApi(htsp=htsp)
+    def basic_auth(self, username, password):
+        token = base64.b64encode(f"{username}:{password}".encode('utf-8')).decode("ascii")
+        return f'Basic {token}'
+
+    def configure(self, server_hostname, server_port, server_user, server_pass):
+        connection = HTTPConnection(server_hostname, server_port)
+        headers = { "Authorization" : self.basic_auth(server_user, server_pass) }
+
+        self.tvhapi = HTMLApi(connection, headers)
 
     def describe(self):
         return self.METRICS.values()
@@ -101,11 +106,11 @@ class tvheadendCollector(object):
                 key: value.clone() for key, value in self.METRICS.items()}
 
             # Counts
-            channel_count = self.htspapi.get_channels_count()
-            epg_count = self.htspapi.get_epg_count()
-            dvr_upcoming_count = self.htspapi.get_dvr_count({}, 'upcoming')
-            dvr_finished_count = self.htspapi.get_dvr_count({}, 'finished')
-            dvr_failed_count = self.htspapi.get_dvr_count({}, 'failed')
+            channel_count = self.tvhapi.get_channels_count()
+            epg_count = self.tvhapi.get_epg_count()
+            dvr_upcoming_count = self.tvhapi.get_dvr_count({}, 'upcoming')
+            dvr_finished_count = self.tvhapi.get_dvr_count({}, 'finished')
+            dvr_failed_count = self.tvhapi.get_dvr_count({}, 'failed')
             metrics['channel_count'].add_metric([], int(channel_count))
             metrics['epg_count'].add_metric([], int(epg_count))
             metrics['dvr_count'].add_metric(['upcoming'],
@@ -115,9 +120,9 @@ class tvheadendCollector(object):
             metrics['dvr_count'].add_metric(['failed'], int(dvr_failed_count))
 
             # Arrays
-            streams = self.htspapi.get_streams()
-            inputs = self.htspapi.get_input_stats()
-            dvr = self.htspapi.get_dvr()
+            streams = self.tvhapi.get_streams()
+            inputs = self.tvhapi.get_input_stats()
+            dvr = self.tvhapi.get_dvr()
 
             metrics['subscription_count'].add_metric([], int(len(streams)))
             # Iterate through arrays
@@ -198,9 +203,12 @@ if __name__ == '__main__':
     parser.add_argument(
         '--server', default=os.getenv("TVH_SERVER"),
         help='server url for tvheadend')
+    parser.add_argument(
+        '--serverport', default=os.getenv("TVH_PORT"),
+        help='port for tvheadend')
     options = parser.parse_args()
     logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT)
-    COLLECTOR.configure(options.server, options.username, options.password)
+    COLLECTOR.configure(options.server, options.serverport, options.username, options.password)
     # Disable accesslog
     wsgiref.simple_server.ServerHandler.close = (
         wsgiref.simple_server.SimpleHandler.close)
