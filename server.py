@@ -186,7 +186,6 @@ class tvheadendCollector(object):
             log.error('Error during collect', exc_info=True)
             raise
 
-
 COLLECTOR = tvheadendCollector()
 # We don't want the `process_` and `python_` metrics, we're a collector,
 # not an exporter.
@@ -194,7 +193,7 @@ REGISTRY = prometheus_client.core.CollectorRegistry()
 REGISTRY.register(COLLECTOR)
 APP = prometheus_client.make_wsgi_app(REGISTRY)
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='0.0.0.0', help='bind host')
     parser.add_argument('--port', default='9429', help='bind port', type=int)
@@ -216,3 +215,6 @@ if __name__ == '__main__':
         wsgiref.simple_server.SimpleHandler.close)
     wsgiref.simple_server.make_server(
         options.host, options.port, APP).serve_forever()
+
+if __name__ == '__main__':
+    main()
