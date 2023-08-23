@@ -17,6 +17,9 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Operating System :: OS Independent",
 ]
+dependencies = [
+    "prometheus_client"
+]
 
 [project.urls]
 "Homepage" = "https://github.com/0x4d4d/tvheadend-exporter"

@@ -3,7 +3,7 @@ Description=Exporting tvheadend metrics for prometheus
 After=network.target
 
 [Service]
-ExecStart=/usr/bin/tvheadend-exporter
+ExecStart=tvheadend-exporter
 Restart=always
 User=hts
 EnvironmentFile=/etc/tvheadend-exporter.conf
