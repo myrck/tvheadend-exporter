@@ -7,7 +7,7 @@ import time
 import wsgiref.simple_server
 
 import prometheus_client.core
-from http.client import HTTPConnection
+import urllib.request
 from tvh.api import HTMLApi
 
 log = logging.getLogger(__name__)
@@ -83,15 +83,17 @@ class tvheadendCollector(object):
             labels=[]),
     }
 
-    def basic_auth(self, username, password):
-        token = base64.b64encode(f"{username}:{password}".encode('utf-8')).decode("ascii")
-        return f'Basic {token}'
-
     def configure(self, server_hostname, server_port, server_user, server_pass):
-        connection = HTTPConnection(server_hostname, server_port)
-        headers = { "Authorization" : self.basic_auth(server_user, server_pass) }
+        auth_handler = urllib.request.HTTPDigestAuthHandler()
+        auth_handler.add_password(uri=f'http://{server_hostname}:{server_port}',
+                                  realm='tvheadend',
+                                  user=server_user,
+                                  passwd=server_pass)
 
-        self.tvhapi = HTMLApi(connection, headers)
+        opener = urllib.request.build_opener(auth_handler)
+        urllib.request.install_opener(opener)
+
+        self.tvhapi = HTMLApi(server_hostname, server_port)
 
     def describe(self):
         return self.METRICS.values()
