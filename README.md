@@ -21,6 +21,62 @@ Arguments are:
 
 <!-- Metrics Exporter -->
 
+### Running locally
+1. Clone or download this repository
+    ```sh
+    git clone https://github.com/0x4d4d/tvheadend-exporter
+    ```
+2. `cd` into the repository directory
+    ```sh
+    cd tvheadend-exporter
+    ```
+3. Install the `tvheadend-exporter` binary:
+    ```sh
+    sudo pip install .
+    ```
+    3.1 Now `tvheadend-exporter` should be executable from command line system-wide
+5. Copy the `tvheadend-exporter.service` systemd unit file to `/etc/systemd/system`
+    ```sh
+    sudo cp -a tvheadend-exporter.service /etc/systemd/system
+    ```
+6. Copy the `tvheadend-exporter.conf` configuration file to `/etc/`
+    ```sh
+    sudo cp -a tvheadend-exporter.conf /etc/
+    ```
+7. Create the `hts` user if not existent, or edit the username in `/etc/systemd/system/tvheadend-exporter.service
+    ```sh
+    sudo useradd -m hts
+    ```
+8. Change username and password (and probably host and port)  in `/etc/tvheadend-exporter.conf`
+    ```sh
+    sudo nano /etc/tvheadend-exporter.conf
+    ```
+9. Load, enable and start the systemd unit file
+    ```sh
+    sudo systemctl daemon-reload
+    sudo systemctl enable --now tvheadend-exporter
+    ```
+10. Check status of the daemon, it should be running:
+    ```sh
+    pi@mediapi:~/git/tvheadend-exporter $ sudo systemctl status tvheadend-exporter
+    ● tvheadend-exporter.service - Exporting tvheadend metrics for prometheus
+         Loaded: loaded (/etc/systemd/system/tvheadend-exporter.service; enabled; ven>
+         Active: active (running) since Thu 2023-08-24 01:52:56 CEST; 6min ago
+       Main PID: 12754 (tvheadend-expor)
+          Tasks: 1 (limit: 1165)
+            CPU: 1.703s
+         CGroup: /system.slice/tvheadend-exporter.service
+                 └─12754 /usr/bin/python3 /usr/local/bin/tvheadend-exporter
+
+    Aug 24 01:52:56 mediapi systemd[1]: tvheadend-exporter.service: Succeeded.
+    Aug 24 01:52:56 mediapi systemd[1]: Stopped Exporting tvheadend metrics for prome>
+    Aug 24 01:52:56 mediapi systemd[1]: Started Exporting tvheadend metrics for prome>
+    ```
+11. Check log output:
+    ```sh
+    sudo journalctl -fu tvheadend-exporter`
+    ```
+
 ### Metrics
 
    ```sh
