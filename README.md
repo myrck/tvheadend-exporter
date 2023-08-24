@@ -77,6 +77,10 @@ Arguments are:
     sudo journalctl -fu tvheadend-exporter`
     ```
 
+### Grafana dashboard
+An example grafana dashboard is provided in [grafana-example-dashboard.json](grafana-example-dashboard.json). It looks somewhat like this:
+![Screenshot of the example grafana dashboard](grafana-example-dashboard.png)
+
 ### Metrics
 
    ```sh
