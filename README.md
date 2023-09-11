@@ -74,7 +74,7 @@ Arguments are:
     ```
 11. Check log output:
     ```sh
-    sudo journalctl -fu tvheadend-exporter`
+    sudo journalctl -fu tvheadend-exporter
     ```
 
 ### Grafana dashboard
