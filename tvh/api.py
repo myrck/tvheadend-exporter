@@ -22,6 +22,10 @@ class HTMLApi(object):
             return json.loads(data.decode(encoding))
         return json.loads(data)
 
+    def get_serverinfo(self, kwargs={}):
+        response = self.get('/api/serverinfo', kwargs)
+        return response
+
     def get_channels_grid(self, kwargs={}):
         response = self.get('/api/channel/grid', kwargs)
         return response['entries']

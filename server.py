@@ -29,6 +29,9 @@ class Gauge(prometheus_client.core.GaugeMetricFamily):
 
 class tvheadendCollector(object):
     METRICS = {
+        'serverinfo': Gauge('serverinfo', 'Information of the TVHeadend Server',
+                            labels=['server_name', 'sw_version']
+        ),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
@@ -105,12 +108,16 @@ class tvheadendCollector(object):
             metrics = {
                 key: value.clone() for key, value in self.METRICS.items()}
 
+            serverinfo = self.tvhapi.get_serverinfo()
+            server_name = serverinfo['name']
+            sw_version = serverinfo['sw_version']
             # Counts
             channel_count = self.tvhapi.get_channels_count()
             epg_count = self.tvhapi.get_epg_count()
             dvr_upcoming_count = self.tvhapi.get_dvr_count({}, 'upcoming')
             dvr_finished_count = self.tvhapi.get_dvr_count({}, 'finished')
             dvr_failed_count = self.tvhapi.get_dvr_count({}, 'failed')
+            metrics['serverinfo'].add_metric([server_name, sw_version], 0)
             metrics['channel_count'].add_metric([], int(channel_count))
             metrics['epg_count'].add_metric([], int(epg_count))
             metrics['dvr_count'].add_metric(['upcoming'],
