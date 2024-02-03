@@ -14,4 +14,7 @@ RUN pip install -r requirements.txt
 COPY tvh ./tvh
 COPY server.py .
 
+HEALTHCHECK --timeout=3s \
+  CMD curl -f http://localhost:9429 || exit 1
+
 CMD [ "python", "./server.py" ]
