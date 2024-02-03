@@ -35,7 +35,7 @@ class tvheadendCollector(object):
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
-            labels=['ip_address', 'title', 'stream']),
+            labels=['ip_address', 'channel_name', 'username']),
         'channel_count': Gauge('channel_count',
                                'Number of channels on the server', labels=[]),
         'epg_count': Gauge('epg_count', 'Number of programmes in the EPG',
@@ -137,8 +137,9 @@ class tvheadendCollector(object):
                 try:
                     hostname = stream['hostname']
                     channel = stream['channel']
+                    username = stream['username']
                     metrics['active_subscription_start_time'].add_metric(
-                        [hostname, channel], stream['start'])
+                        [hostname, channel, username], stream['start'])
                 except KeyError:
                     metrics['active_subscription_start_time'].add_metric(
                         [], stream['start'])
