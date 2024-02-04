@@ -1,15 +1,14 @@
 import re
 import json
+import urllib.request
 
 class HTMLApi(object):
-
-    def __init__(self, httpCon, headers):
-        self.httpCon = httpCon
-        self.headers = headers
+    def __init__(self, server_hostname, server_port):
+        self.server_hostname = server_hostname
+        self.server_port = server_port
 
     def get(self, path, args={}):
-        self.httpCon.request("GET", path, headers=self.headers)
-        res = self.httpCon.getresponse()
+        res = urllib.request.urlopen(f'http://{self.server_hostname}:{self.server_port}/{path}')
 
         contentType = res.headers["Content-Type"]
         match = re.search("charset=(.+)", contentType)

@@ -7,7 +7,7 @@ import time
 import wsgiref.simple_server
 
 import prometheus_client.core
-from http.client import HTTPConnection
+import urllib.request
 from tvh.api import HTMLApi
 
 log = logging.getLogger(__name__)
@@ -86,15 +86,17 @@ class tvheadendCollector(object):
             labels=[]),
     }
 
-    def basic_auth(self, username, password):
-        token = base64.b64encode(f"{username}:{password}".encode('utf-8')).decode("ascii")
-        return f'Basic {token}'
-
     def configure(self, server_hostname, server_port, server_user, server_pass):
-        connection = HTTPConnection(server_hostname, server_port)
-        headers = { "Authorization" : self.basic_auth(server_user, server_pass) }
+        auth_handler = urllib.request.HTTPDigestAuthHandler()
+        auth_handler.add_password(uri=f'http://{server_hostname}:{server_port}',
+                                  realm='tvheadend',
+                                  user=server_user,
+                                  passwd=server_pass)
 
-        self.tvhapi = HTMLApi(connection, headers)
+        opener = urllib.request.build_opener(auth_handler)
+        urllib.request.install_opener(opener)
+
+        self.tvhapi = HTMLApi(server_hostname, server_port)
 
     def describe(self):
         return self.METRICS.values()
@@ -193,7 +195,6 @@ class tvheadendCollector(object):
             log.error('Error during collect', exc_info=True)
             raise
 
-
 COLLECTOR = tvheadendCollector()
 # We don't want the `process_` and `python_` metrics, we're a collector,
 # not an exporter.
@@ -201,7 +202,7 @@ REGISTRY = prometheus_client.core.CollectorRegistry()
 REGISTRY.register(COLLECTOR)
 APP = prometheus_client.make_wsgi_app(REGISTRY)
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser()
     parser.add_argument('--host', default='0.0.0.0', help='bind host')
     parser.add_argument('--port', default='9429', help='bind port', type=int)
@@ -223,3 +224,6 @@ if __name__ == '__main__':
         wsgiref.simple_server.SimpleHandler.close)
     wsgiref.simple_server.make_server(
         options.host, options.port, APP).serve_forever()
+
+if __name__ == '__main__':
+    main()

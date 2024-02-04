@@ -1,0 +1,12 @@
+[Unit]
+Description=Exporting tvheadend metrics for prometheus
+After=network.target
+
+[Service]
+ExecStart=tvheadend-exporter
+Restart=always
+User=hts
+EnvironmentFile=/etc/tvheadend-exporter.conf
+
+[Install]
+WantedBy=multi-user.target

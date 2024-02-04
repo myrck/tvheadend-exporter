@@ -1,0 +1,29 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tvheadend_exporter"
+version = "0.0.1"
+authors = [
+  { name="Mark McWhirter", email="mark@markmcw.uk" },
+  { name="Michael Myrcik", email="michael.myrcik@web.de" },
+  { name="LukeLR", email="public@lrose.de" },
+]
+description = "Exporting tvheadend metrics for prometheus"
+readme = "README.md"
+requires-python = ">=3"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "prometheus_client"
+]
+
+[project.urls]
+"Homepage" = "https://github.com/0x4d4d/tvheadend-exporter"
+"Bug Tracker" = "https://github.com/0x4d4d/tvheadend-exporter/issues"
+
+[project.scripts]
+tvheadend-exporter = "server:main"
