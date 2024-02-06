@@ -3,6 +3,8 @@ import json
 
 class HTMLApi(object):
 
+    GRID_LIMIT = '4294967295'
+
     def __init__(self, httpCon, headers):
         self.httpCon = httpCon
         self.headers = headers
@@ -25,6 +27,10 @@ class HTMLApi(object):
     def get_serverinfo(self, kwargs={}):
         response = self.get('/api/serverinfo', kwargs)
         return response
+
+    def get_network_grid(self, kwargs={}):
+        response = self.get('/api/mpegts/network/grid?limit='+self.GRID_LIMIT, kwargs)
+        return response['entries']
 
     def get_channels_grid(self, kwargs={}):
         response = self.get('/api/channel/grid', kwargs)

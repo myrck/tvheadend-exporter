@@ -29,9 +29,28 @@ class Gauge(prometheus_client.core.GaugeMetricFamily):
 
 class tvheadendCollector(object):
     METRICS = {
-        'serverinfo': Gauge('serverinfo', 'Information of the TVHeadend Server',
+        'serverinfo': Gauge('serverinfo',
+                            'Information of the TVHeadend server',
                             labels=['server_name', 'sw_version']
         ),
+        'network_count': Gauge('network_count',
+                               'Total number of networks on this server',
+                               labels=[]),
+        'network_enabled': Gauge('network_enabled',
+                                 'Whether the network is enabled or disabled',
+                                 labels=['network_name']),
+        'network_muxes': Gauge('network_muxes',
+                               'Total number of muxes found on this network',
+                               labels=['network_name']),
+        'network_services': Gauge('network_services',
+                                  'Total number of services found on this network',
+                                  labels=['network_name']),
+        'network_channels': Gauge('network_channels',
+                                  'Total number of mapped channels found on this network',
+                                  labels=['network_name']),
+        'network_scans': Gauge('network_scans',
+                               'The number of muxes left to scan on this network',
+                               labels=['network_name']),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
@@ -108,16 +127,34 @@ class tvheadendCollector(object):
             metrics = {
                 key: value.clone() for key, value in self.METRICS.items()}
 
+            # Serverinfo
             serverinfo = self.tvhapi.get_serverinfo()
             server_name = serverinfo['name']
             sw_version = serverinfo['sw_version']
+            metrics['serverinfo'].add_metric([server_name, sw_version], 0)
+
+            # Networks
+            networks = self.tvhapi.get_network_grid()
+            metrics['network_count'].add_metric([], len(networks))
+            for network in networks:
+                network_name = network['networkname']
+                metrics['network_enabled'].add_metric(
+                    [network_name], int(network['enabled']))
+                metrics['network_muxes'].add_metric(
+                    [network_name], network['num_mux'])
+                metrics['network_services'].add_metric(
+                    [network_name], network['num_svc'])
+                metrics['network_channels'].add_metric(
+                    [network_name], network['num_chn'])
+                metrics['network_scans'].add_metric(
+                    [network_name], network['scanq_length'])
+
             # Counts
             channel_count = self.tvhapi.get_channels_count()
             epg_count = self.tvhapi.get_epg_count()
             dvr_upcoming_count = self.tvhapi.get_dvr_count({}, 'upcoming')
             dvr_finished_count = self.tvhapi.get_dvr_count({}, 'finished')
             dvr_failed_count = self.tvhapi.get_dvr_count({}, 'failed')
-            metrics['serverinfo'].add_metric([server_name, sw_version], 0)
             metrics['channel_count'].add_metric([], int(channel_count))
             metrics['epg_count'].add_metric([], int(epg_count))
             metrics['dvr_count'].add_metric(['upcoming'],
