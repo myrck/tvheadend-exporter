@@ -102,6 +102,9 @@ class tvheadendCollector(object):
         'dvr_duration': Gauge('dvr_duration',
                               'Duration for DVR Event',
                               labels=["channel_name", "programme_title", "status"]),
+        'connection_streaming': Gauge('connection_streaming',
+                                      'The number of active streams',
+                                      labels=["hostname", "type", "username"]),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
@@ -244,6 +247,17 @@ class tvheadendCollector(object):
                     [channel_name, programme_title, status], finish_timestamp)
                 metrics['dvr_duration'].add_metric(
                     [channel_name, programme_title, status], duration)
+
+            # Connections
+            connections = self.tvhapi.get_connection_stats()
+            for connection in connections:
+                hostname = connection['peer']
+                typename = connection['type']
+                username = connection['user']
+                streaming = connection['streaming']
+
+                metrics['connection_streaming'].add_metric(
+                    [hostname, typename, username], streaming)
 
             # Arrays
             streams = self.tvhapi.get_streams()

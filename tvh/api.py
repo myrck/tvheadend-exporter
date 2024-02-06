@@ -62,6 +62,10 @@ class HTMLApi(object):
         response = self.get(path, kwargs)
         return response['entries']
 
+    def get_connection_stats(self, kwargs={}):
+        response = self.get('/api/status/connections', kwargs)
+        return response['entries']
+
     def get_input_stats(self, kwargs={}):
         response = self.get('/api/status/inputs', kwargs)
         return response['entries']
