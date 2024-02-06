@@ -78,12 +78,22 @@ class tvheadendCollector(object):
         'service_channel_count': Gauge('service_channel_count',
                                        'Total number of channels mapped to this service',
                                        labels=['network_name', 'mux_name', 'service_name']),
+        'channel_count': Gauge('channel_count',
+                               'Number of channels on the server',
+                               labels=[]),
+        'channel_enabled': Gauge('channel_enabled',
+                                 'Whether the channel is enabled or disabled',
+                                  labels=['channel_name']),
+        'channel_service_count': Gauge('channel_service_count',
+                                       'Total number of services associated to this channel',
+                                        labels=['channel_name']),
+        'channel_epg_count': Gauge('channel_epg_count',
+                                   'Total number of EPG event to this channel',
+                                   labels=['channel_name']),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
             labels=['hostname', 'channel_name', 'username', 'client']),
-        'channel_count': Gauge('channel_count',
-                               'Number of channels on the server', labels=[]),
         'epg_count': Gauge('epg_count', 'Number of programmes in the EPG',
                            labels=[]),
         'subscription_count': Gauge('subscription_count',
@@ -208,13 +218,25 @@ class tvheadendCollector(object):
                 metrics['service_channel_count'].add_metric(
                     [network_name, mux_name, service_name], len(service['channel']))
 
+            # Channels
+            channels = self.tvhapi.get_channel_grid()
+            metrics['channel_count'].add_metric([], len(channels))
+            for channel in channels:
+                channel_name = channel['name']
+
+                metrics['channel_enabled'].add_metric(
+                    [channel_name], int(channel['enabled']))
+                metrics['channel_service_count'].add_metric(
+                    [channel_name], len(channel['services']))
+                count = self.tvhapi.get_epg_count(channel_name)
+                metrics['channel_epg_count'].add_metric(
+                    [channel_name], count)
+
             # Counts
-            channel_count = self.tvhapi.get_channels_count()
             epg_count = self.tvhapi.get_epg_count()
             dvr_upcoming_count = self.tvhapi.get_dvr_count({}, 'upcoming')
             dvr_finished_count = self.tvhapi.get_dvr_count({}, 'finished')
             dvr_failed_count = self.tvhapi.get_dvr_count({}, 'failed')
-            metrics['channel_count'].add_metric([], int(channel_count))
             metrics['epg_count'].add_metric([], int(epg_count))
             metrics['dvr_count'].add_metric(['upcoming'],
                                             int(dvr_upcoming_count))

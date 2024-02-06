@@ -1,5 +1,6 @@
 import re
 import json
+import urllib.parse
 
 class HTMLApi(object):
 
@@ -40,16 +41,15 @@ class HTMLApi(object):
         response = self.get('/api/mpegts/service/grid?limit='+self.GRID_LIMIT, kwargs)
         return response['entries']
 
-    def get_channels_grid(self, kwargs={}):
-        response = self.get('/api/channel/grid', kwargs)
+    def get_channel_grid(self, kwargs={}):
+        response = self.get('/api/channel/grid?limit='+self.GRID_LIMIT, kwargs)
         return response['entries']
     
-    def get_channels_count(self, kwargs={}):
-        response = self.get('/api/channel/grid', kwargs)
-        return response['total']
-    
-    def get_epg_count(self, kwargs={}):
-        response = self.get('/api/epg/events/grid', kwargs)
+    def get_epg_count(self, channel=None):
+        path = '/api/epg/events/grid?limit=0'
+        if channel:
+            path = path+'&channel='+urllib.parse.quote(channel)
+        response = self.get(path, {})
         return response['totalCount']
 
     def get_input_stats(self, kwargs={}):
