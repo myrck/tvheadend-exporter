@@ -93,6 +93,15 @@ class tvheadendCollector(object):
         'epg_count': Gauge('epg_count',
                            'Number of programmes in the EPG',
                            labels=[]),
+        'dvr_start_time': Gauge('dvr_start_time',
+                                'Start time for DVR Event',
+                                labels=["channel_name", "programme_title", "status"]),
+        'dvr_finish_time': Gauge('dvr_finish_time',
+                                 'Finish time for DVR Event',
+                                 labels=["channel_name", "programme_title", "status"]),
+        'dvr_duration': Gauge('dvr_duration',
+                              'Duration for DVR Event',
+                              labels=["channel_name", "programme_title", "status"]),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
@@ -119,25 +128,7 @@ class tvheadendCollector(object):
         'input_continuity_errors': Gauge('input_continuity_errors',
                                          'Continuity Errors for Inputs',
                                          labels=['name', 'stream']),
-        'dvr_count': Gauge('dvr_count',
-                           'Number of events in the DVR',
-                           labels=["status"]),
 
-        'dvr_start_time': Gauge('dvr_start_time',
-                                'Start time for DVR Event',
-                                labels=["channel_name",
-                                        "programme_title",
-                                        "status", "state"]),
-        'dvr_finish_time': Gauge('dvr_finish_time',
-                                 'Finish time for DVR Event',
-                                 labels=["channel_name",
-                                         "programme_title",
-                                         "status", "state"]),
-        'dvr_duration': Gauge('dvr_duration',
-                              'Duration for DVR Event',
-                              labels=["channel_name",
-                                      "programme_title",
-                                      "status", "state"]),
         'scrape_duration_seconds': Gauge(
             'scrape_duration_seconds', 'Duration of TVHeadend scrape',
             labels=[]),
@@ -237,20 +228,26 @@ class tvheadendCollector(object):
             epg_count = self.tvhapi.get_epg_count()
             metrics['epg_count'].add_metric([], int(epg_count))
 
-            # Counts
-            dvr_upcoming_count = self.tvhapi.get_dvr_count({}, 'upcoming')
-            dvr_finished_count = self.tvhapi.get_dvr_count({}, 'finished')
-            dvr_failed_count = self.tvhapi.get_dvr_count({}, 'failed')
-            metrics['dvr_count'].add_metric(['upcoming'],
-                                            int(dvr_upcoming_count))
-            metrics['dvr_count'].add_metric(['finished'],
-                                            int(dvr_finished_count))
-            metrics['dvr_count'].add_metric(['failed'], int(dvr_failed_count))
+            # DVR
+            dvr = self.tvhapi.get_dvr()
+            for recording in dvr:
+                channel_name = recording['channelname']
+                programme_title = recording['disp_title']
+                start_timestamp = recording['start']
+                finish_timestamp = recording['stop']
+                duration = recording['duration']
+                status = recording['status']
+
+                metrics['dvr_start_time'].add_metric(
+                    [channel_name, programme_title, status], start_timestamp)
+                metrics['dvr_finish_time'].add_metric(
+                    [channel_name, programme_title, status], finish_timestamp)
+                metrics['dvr_duration'].add_metric(
+                    [channel_name, programme_title, status], duration)
 
             # Arrays
             streams = self.tvhapi.get_streams()
             inputs = self.tvhapi.get_input_stats()
-            dvr = self.tvhapi.get_dvr()
 
             metrics['subscription_count'].add_metric([], int(len(streams)))
             # Iterate through arrays
@@ -282,30 +279,6 @@ class tvheadendCollector(object):
                         [name, stream], dvb_input['cc'])
                 except KeyError:
                     pass
-
-                for recording in dvr:
-                    try:
-                        channel_name = recording['channelname']
-                        programme_title = recording['disp_title']
-                        start_timestamp = recording['start']
-                        finish_timestamp = recording['stop']
-                        duration = recording['duration']
-                        status = recording['status']
-                        recording_state = recording['sched_status']
-
-                        metrics['dvr_start_time'].add_metric(
-                            [channel_name, programme_title, status,
-                             recording_state], start_timestamp)
-                        metrics['dvr_finish_time'].add_metric(
-                            [channel_name, programme_title, status,
-                             recording_state], finish_timestamp)
-                        metrics['dvr_duration'].add_metric(
-                            [channel_name, programme_title, status,
-                             recording_state],
-                            duration)
-
-                    except KeyError:
-                        pass
 
             metrics['scrape_duration_seconds'].add_metric(
                 [], time.time() - start)

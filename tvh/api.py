@@ -52,28 +52,20 @@ class HTMLApi(object):
         response = self.get(path, {})
         return response['totalCount']
 
-    def get_input_stats(self, kwargs={}):
-        response = self.get('/api/status/inputs', kwargs)
-        return response['entries']
-    
-    def get_dvr_count(self, kwargs={}, state=''):
-        if state == '':
-            path = '/api/dvr/entry/grid'
-        else:
-            path = '/api/dvr/entry/grid_'+state
-
-        response = self.get(path, kwargs)
-        return response['total']
-
-    def get_streams(self, kwargs={}):
-        response = self.get('/api/status/subscriptions', kwargs)
-        return response['entries']
-
     def get_dvr(self, kwargs={}, state=''):
         if state == '':
             path = '/api/dvr/entry/grid'
         else:
             path = '/api/dvr/entry/grid_'+state
 
+        path = path+'?limit='+self.GRID_LIMIT
         response = self.get(path, kwargs)
+        return response['entries']
+
+    def get_input_stats(self, kwargs={}):
+        response = self.get('/api/status/inputs', kwargs)
+        return response['entries']
+
+    def get_streams(self, kwargs={}):
+        response = self.get('/api/status/subscriptions', kwargs)
         return response['entries']
