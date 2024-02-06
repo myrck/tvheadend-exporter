@@ -90,12 +90,13 @@ class tvheadendCollector(object):
         'channel_epg_count': Gauge('channel_epg_count',
                                    'Total number of EPG event to this channel',
                                    labels=['channel_name']),
+        'epg_count': Gauge('epg_count',
+                           'Number of programmes in the EPG',
+                           labels=[]),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
             labels=['hostname', 'channel_name', 'username', 'client']),
-        'epg_count': Gauge('epg_count', 'Number of programmes in the EPG',
-                           labels=[]),
         'subscription_count': Gauge('subscription_count',
                                     'Number of active subscriptions',
                                     labels=[]),
@@ -232,12 +233,14 @@ class tvheadendCollector(object):
                 metrics['channel_epg_count'].add_metric(
                     [channel_name], count)
 
-            # Counts
+            # EPG
             epg_count = self.tvhapi.get_epg_count()
+            metrics['epg_count'].add_metric([], int(epg_count))
+
+            # Counts
             dvr_upcoming_count = self.tvhapi.get_dvr_count({}, 'upcoming')
             dvr_finished_count = self.tvhapi.get_dvr_count({}, 'finished')
             dvr_failed_count = self.tvhapi.get_dvr_count({}, 'failed')
-            metrics['epg_count'].add_metric([], int(epg_count))
             metrics['dvr_count'].add_metric(['upcoming'],
                                             int(dvr_upcoming_count))
             metrics['dvr_count'].add_metric(['finished'],
