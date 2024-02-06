@@ -51,6 +51,24 @@ class tvheadendCollector(object):
         'network_scans': Gauge('network_scans',
                                'The number of muxes left to scan on this network',
                                labels=['network_name']),
+        'mux_count': Gauge('mux_count',
+                           'Total number of muxes on this server',
+                            labels=[]),
+        'mux_enabled': Gauge('mux_enabled',
+                             'Whether the mux is enabled, disabled or ignored',
+                             labels=['network_name', 'mux_name']),
+        'mux_scan_state': Gauge('mux_scan_state',
+                                'The scan state',
+                                labels=['network_name', 'mux_name']),
+        'mux_scan_result': Gauge('mux_scan_result',
+                                 'The outcome of the last scan performed',
+                                 labels=['network_name', 'mux_name']),
+        'mux_services': Gauge('mux_services',
+                              'Total number of services found',
+                              labels=['network_name', 'mux_name']),
+        'mux_channels': Gauge('mux_channels',
+                              'The number of services currently mapped to channels',
+                              labels=['network_name', 'mux_name']),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
@@ -138,6 +156,7 @@ class tvheadendCollector(object):
             metrics['network_count'].add_metric([], len(networks))
             for network in networks:
                 network_name = network['networkname']
+
                 metrics['network_enabled'].add_metric(
                     [network_name], int(network['enabled']))
                 metrics['network_muxes'].add_metric(
@@ -148,6 +167,24 @@ class tvheadendCollector(object):
                     [network_name], network['num_chn'])
                 metrics['network_scans'].add_metric(
                     [network_name], network['scanq_length'])
+
+            # Muxes
+            muxes = self.tvhapi.get_mux_grid()
+            metrics['mux_count'].add_metric([], len(muxes))
+            for mux in muxes:
+                network_name = mux['network']
+                mux_name = mux['name']
+
+                metrics['mux_enabled'].add_metric(
+                    [network_name, mux_name], mux['enabled'])
+                metrics['mux_scan_state'].add_metric(
+                    [network_name, mux_name], mux['scan_state'])
+                metrics['mux_scan_result'].add_metric(
+                    [network_name, mux_name], mux['scan_result'])
+                metrics['mux_services'].add_metric(
+                    [network_name, mux_name], mux['num_svc'])
+                metrics['mux_channels'].add_metric(
+                    [network_name, mux_name], mux['num_chn'])
 
             # Counts
             channel_count = self.tvhapi.get_channels_count()
