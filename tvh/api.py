@@ -36,6 +36,10 @@ class HTMLApi(object):
         response = self.get('/api/mpegts/mux/grid?limit='+self.GRID_LIMIT, kwargs)
         return response['entries']
 
+    def get_service_grid(self, kwargs={}):
+        response = self.get('/api/mpegts/service/grid?limit='+self.GRID_LIMIT, kwargs)
+        return response['entries']
+
     def get_channels_grid(self, kwargs={}):
         response = self.get('/api/channel/grid', kwargs)
         return response['entries']

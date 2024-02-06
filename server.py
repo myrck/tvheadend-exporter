@@ -69,6 +69,15 @@ class tvheadendCollector(object):
         'mux_channels': Gauge('mux_channels',
                               'The number of services currently mapped to channels',
                               labels=['network_name', 'mux_name']),
+        'service_count': Gauge('service_count',
+                               'Total number of services on this server',
+                               labels=[]),
+        'service_enabled': Gauge('service_enabled',
+                                 'Whether the service is enabled or disabled',
+                                  labels=['network_name', 'mux_name', 'service_name']),
+        'service_channel_count': Gauge('service_channel_count',
+                                       'Total number of channels mapped to this service',
+                                       labels=['network_name', 'mux_name', 'service_name']),
         'active_subscription_start_time': Gauge(
             'active_subscription_start_time',
             'Start time for an active connection to the TVHeadend Server',
@@ -185,6 +194,19 @@ class tvheadendCollector(object):
                     [network_name, mux_name], mux['num_svc'])
                 metrics['mux_channels'].add_metric(
                     [network_name, mux_name], mux['num_chn'])
+
+            # Service
+            services = self.tvhapi.get_service_grid()
+            metrics['service_count'].add_metric([], len(services))
+            for service in services:
+                network_name = service['network']
+                mux_name = service['multiplex']
+                service_name = service['svcname']
+
+                metrics['service_enabled'].add_metric(
+                    [network_name, mux_name, service_name], int(service['enabled']))
+                metrics['service_channel_count'].add_metric(
+                    [network_name, mux_name, service_name], len(service['channel']))
 
             # Counts
             channel_count = self.tvhapi.get_channels_count()
