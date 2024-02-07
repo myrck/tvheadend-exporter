@@ -26,6 +26,18 @@ class Gauge(prometheus_client.core.GaugeMetricFamily):
     def clone(self):
         return type(self)(self._name, self.documentation, self._labelnames)
 
+class Counter(prometheus_client.core.CounterMetricFamily):
+    NAMESPACE = 'tvheadend'
+
+    def __init__(self, name, documentation, labels):
+        super(Counter, self).__init__('%s_%s' %
+                                      (self.NAMESPACE, name), documentation,
+                                      labels=labels)
+        self._name = name
+
+    def clone(self):
+        return type(self)(self._name, self.documentation, self._labelnames)
+
 
 class tvheadendCollector(object):
     METRICS = {
@@ -105,13 +117,29 @@ class tvheadendCollector(object):
         'connection_streaming': Gauge('connection_streaming',
                                       'The number of active streams',
                                       labels=["hostname", "type", "username"]),
-        'active_subscription_start_time': Gauge(
-            'active_subscription_start_time',
-            'Start time for an active connection to the TVHeadend Server',
-            labels=['hostname', 'channel_name', 'username', 'client']),
         'subscription_count': Gauge('subscription_count',
                                     'Number of active subscriptions',
                                     labels=[]),
+        'subscription_errors': Gauge('subscription_errors',
+                                     'Number of errors occurred sending the stream',
+                                     labels=['title', 'state', 'hostname', 'username', 
+                                             'client', 'channel_name', 'service', 'profile']),
+        'subscription_in': Gauge('subscription_in',
+                                 'The input data rate in kb/s',
+                                 labels=['title', 'state', 'hostname', 'username', 
+                                         'client', 'channel_name', 'service', 'profile']),
+        'subscription_out': Gauge('subscription_out',
+                                  'The output data rate in kb/s',
+                                  labels=['title', 'state', 'hostname', 'username', 
+                                          'client', 'channel_name', 'service', 'profile']),
+        'subscription_total_in': Counter('subscription_in',
+                                         'The total data in kb',
+                                          labels=['title', 'state', 'hostname', 'username', 
+                                               'client', 'channel_name', 'service', 'profile']),
+        'subscription_total_out': Counter('subscription_out',
+                                          'The total data in kb',
+                                           labels=['title', 'state', 'hostname', 'username', 
+                                                   'client', 'channel_name', 'service', 'profile']),
         'input_signal_noise_ratio': Gauge('input_signal_noise_ratio',
                                           'Signal Noise Ratio for DVB Inputs',
                                           labels=['name', 'stream']),
@@ -259,23 +287,44 @@ class tvheadendCollector(object):
                 metrics['connection_streaming'].add_metric(
                     [hostname, typename, username], streaming)
 
+            # Subscriptions
+            subscriptions = self.tvhapi.get_subscriptions()
+            metrics['subscription_count'].add_metric([], int(len(subscriptions)))
+            for subscription in subscriptions:
+                title = subscription['title']
+                state = subscription['state']
+                hostname = subscription.get('hostname', '')
+                username = subscription.get('username', '')
+                client = subscription.get('client', '')
+                channel = subscription.get('channel', '')
+                service = subscription.get('service', '')
+                profile = subscription.get('profile', '')
+
+                metrics['subscription_errors'].add_metric(
+                    [title, state, hostname, username, 
+                    client, channel, service, profile], 
+                    subscription['errors'])
+                metrics['subscription_in'].add_metric(
+                    [title, state, hostname, username, 
+                    client, channel, service, profile], 
+                    subscription['in'])
+                metrics['subscription_out'].add_metric(
+                    [title, state, hostname, username, 
+                    client, channel, service, profile], 
+                    subscription['out'])
+                metrics['subscription_total_in'].add_metric(
+                    [title, state, hostname, username, 
+                    client, channel, service, profile], 
+                    subscription['total_in'])
+                metrics['subscription_total_out'].add_metric(
+                    [title, state, hostname, username, 
+                    client, channel, service, profile], 
+                    subscription['total_out'])
+
             # Arrays
-            streams = self.tvhapi.get_streams()
             inputs = self.tvhapi.get_input_stats()
 
-            metrics['subscription_count'].add_metric([], int(len(streams)))
             # Iterate through arrays
-            for stream in streams:
-                try:
-                    hostname = stream['hostname']
-                    channel = stream['channel']
-                    username = stream['username']
-                    client = stream['client']
-                    metrics['active_subscription_start_time'].add_metric(
-                        [hostname, channel, username, client], stream['start'])
-                except KeyError:
-                    metrics['active_subscription_start_time'].add_metric(
-                        [], stream['start'])
 
             for dvb_input in inputs:
                 try:

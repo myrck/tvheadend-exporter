@@ -66,10 +66,10 @@ class HTMLApi(object):
         response = self.get('/api/status/connections', kwargs)
         return response['entries']
 
-    def get_input_stats(self, kwargs={}):
-        response = self.get('/api/status/inputs', kwargs)
+    def get_subscriptions(self, kwargs={}):
+        response = self.get('/api/status/subscriptions', kwargs)
         return response['entries']
 
-    def get_streams(self, kwargs={}):
-        response = self.get('/api/status/subscriptions', kwargs)
+    def get_input_stats(self, kwargs={}):
+        response = self.get('/api/status/inputs', kwargs)
         return response['entries']
