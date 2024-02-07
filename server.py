@@ -140,21 +140,24 @@ class tvheadendCollector(object):
                                           'The total data in kb',
                                            labels=['title', 'state', 'hostname', 'username', 
                                                    'client', 'channel_name', 'service', 'profile']),
+        'input_subscriptions': Gauge('input_subscriptions',
+                                     'Number of subscriptions using the stream',
+                                     labels=['name', 'stream']),
         'input_signal_noise_ratio': Gauge('input_signal_noise_ratio',
                                           'Signal Noise Ratio for DVB Inputs',
                                           labels=['name', 'stream']),
-        'input_signal_noise_ratio_scale': Gauge(
-            'input_signal_noise_ratio_scale',
-            'A value of 1 indicates that the '
-            'corresponding signal or SNR reading'
-            'is relative',
-            labels=['name', 'stream']),
+        'input_signal_noise_ratio_scale': Gauge('input_signal_noise_ratio_scale',
+                                                'A value of 1 indicates that the '
+                                                'corresponding signal or SNR reading'
+                                                'is relative',
+                                                labels=['name', 'stream']),
         'input_signal_scale': Gauge('input_signal_scale',
                                     'A value of 1 indicates that the '
                                     'corresponding signal or SNR reading '
                                     'is relative',
                                     labels=['name', 'stream']),
-        'input_signal': Gauge('input_signal', 'Signal Strength for DVB Inputs',
+        'input_signal': Gauge('input_signal', 
+                              'Signal Strength for DVB Inputs',
                               labels=['name', 'stream']),
         'input_continuity_errors': Gauge('input_continuity_errors',
                                          'Continuity Errors for Inputs',
@@ -321,27 +324,24 @@ class tvheadendCollector(object):
                     client, channel, service, profile], 
                     subscription['total_out'])
 
-            # Arrays
+            # Inputs
             inputs = self.tvhapi.get_input_stats()
-
-            # Iterate through arrays
-
             for dvb_input in inputs:
-                try:
-                    name = dvb_input['input']
-                    stream = dvb_input['stream']
-                    metrics['input_signal_noise_ratio'].add_metric(
-                        [name, stream], dvb_input['snr'])
-                    metrics['input_signal_noise_ratio_scale'].add_metric(
-                        [name, stream], dvb_input['snr_scale'])
-                    metrics['input_signal'].add_metric(
-                        [name, stream], dvb_input['signal'])
-                    metrics['input_signal_scale'].add_metric(
-                        [name, stream], dvb_input['signal_scale'])
-                    metrics['input_continuity_errors'].add_metric(
-                        [name, stream], dvb_input['cc'])
-                except KeyError:
-                    pass
+                name = dvb_input.get('input', '')
+                stream = dvb_input.get('stream', '')
+                
+                metrics['input_subscriptions'].add_metric(
+                    [name, stream], dvb_input['subs'])
+                metrics['input_signal_noise_ratio'].add_metric(
+                    [name, stream], dvb_input['snr'])
+                metrics['input_signal_noise_ratio_scale'].add_metric(
+                    [name, stream], dvb_input['snr_scale'])
+                metrics['input_signal'].add_metric(
+                    [name, stream], dvb_input['signal'])
+                metrics['input_signal_scale'].add_metric(
+                    [name, stream], dvb_input['signal_scale'])
+                metrics['input_continuity_errors'].add_metric(
+                    [name, stream], dvb_input['cc'])
 
             metrics['scrape_duration_seconds'].add_metric(
                 [], time.time() - start)
