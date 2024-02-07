@@ -107,13 +107,13 @@ class tvheadendCollector(object):
                            labels=[]),
         'dvr_start_time': Gauge('dvr_start_time',
                                 'Start time for DVR Event',
-                                labels=["channel_name", "programme_title", "status"]),
+                                labels=["uuid", "channel_name", "programme_title", "status", "username"]),
         'dvr_finish_time': Gauge('dvr_finish_time',
                                  'Finish time for DVR Event',
-                                 labels=["channel_name", "programme_title", "status"]),
+                                 labels=["uuid", "channel_name", "programme_title", "status", "username"]),
         'dvr_duration': Gauge('dvr_duration',
                               'Duration for DVR Event',
-                              labels=["channel_name", "programme_title", "status"]),
+                              labels=["uuid", "channel_name", "programme_title", "status", "username"]),
         'connection_streaming': Gauge('connection_streaming',
                                       'The number of active streams',
                                       labels=["hostname", "type", "username"]),
@@ -265,19 +265,18 @@ class tvheadendCollector(object):
             # DVR
             dvr = self.tvhapi.get_dvr()
             for recording in dvr:
+                uuid = recording['uuid']
                 channel_name = recording['channelname']
                 programme_title = recording['disp_title']
-                start_timestamp = recording['start']
-                finish_timestamp = recording['stop']
-                duration = recording['duration']
                 status = recording['status']
+                creator = recording['creator']
 
                 metrics['dvr_start_time'].add_metric(
-                    [channel_name, programme_title, status], start_timestamp)
+                    [uuid, channel_name, programme_title, status, creator], recording['start'])
                 metrics['dvr_finish_time'].add_metric(
-                    [channel_name, programme_title, status], finish_timestamp)
+                    [uuid, channel_name, programme_title, status, creator], recording['stop'])
                 metrics['dvr_duration'].add_metric(
-                    [channel_name, programme_title, status], duration)
+                    [uuid, channel_name, programme_title, status, creator], recording['duration'])
 
             # Connections
             connections = self.tvhapi.get_connection_stats()
