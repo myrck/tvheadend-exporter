@@ -3,16 +3,6 @@ name: CI
 on: [push]
 
 jobs:
-  linting:
-    runs-on: ubuntu-18.04
-    name: Linting
-    steps:
-      - uses: actions/checkout@master
-      - uses: actions/setup-python@v1
-        with:
-          python-version: '2.7'
-      - uses: whynothugo/python-linting@master
-
   deploy:
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/master'
@@ -20,9 +10,10 @@ jobs:
       -
         name: Checkout
         uses: actions/checkout@v2
-      - name: Tag Release
+      - 
+        name: Tag Release
         id: tag_release
-        uses: anothrNick/github-tag-action@1.33.0
+        uses: anothrNick/github-tag-action@1.64.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           WITH_V: true
@@ -34,10 +25,18 @@ jobs:
         uses: docker/setup-buildx-action@v1
       -
         name: Login to DockerHub
-        uses: docker/login-action@v1
+        uses: docker/login-action@v2
         with:
+          registry: docker.io
           username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - 
+        name: Login to GitHub Container Registry
+        uses: docker/login-action@v2 
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
       -
         name: Build and push
         uses: docker/build-push-action@v2
@@ -47,5 +46,7 @@ jobs:
           platforms: linux/386,linux/amd64,linux/arm/v6,linux/arm/v7,linux/arm64,linux/ppc64le,linux/s390x
           push: true
           tags: |
-            0x4d4d/tvheadend-exporter:latest
-            0x4d4d/tvheadend-exporter:${{ steps.tag_release.outputs.tag }}
+            docker.io/0x4d4d/tvheadend-exporter:latest
+            docker.io/0x4d4d/tvheadend-exporter:${{ steps.tag_release.outputs.tag }}
+            ghcr.io/0x4d4d/tvheadend-exporter:latest
+            ghcr.io/0x4d4d/tvheadend-exporter:${{ steps.tag_release.outputs.tag }}
