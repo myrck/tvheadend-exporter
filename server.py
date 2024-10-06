@@ -174,7 +174,9 @@ class tvheadendCollector(object):
 
     def configure(self, server_hostname, server_port, server_user, server_pass):
         connection = HTTPConnection(server_hostname, server_port)
-        headers = { "Authorization" : self.basic_auth(server_user, server_pass) }
+        headers = {}
+        if server_user and server_pass:
+            headers = { "Authorization" : self.basic_auth(server_user, server_pass) }
 
         self.tvhapi = HTMLApi(connection, headers)
 
