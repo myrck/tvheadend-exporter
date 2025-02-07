@@ -285,7 +285,10 @@ class tvheadendCollector(object):
             for connection in connections:
                 hostname = connection['peer']
                 typename = connection['type']
-                username = connection['user']
+                if "name" in connection.keys():
+                    username = connection['user']
+                else:
+                    username = ''
                 streaming = connection['streaming']
 
                 metrics['connection_streaming'].add_metric(
@@ -298,7 +301,10 @@ class tvheadendCollector(object):
                 title = subscription['title']
                 state = subscription['state']
                 hostname = subscription.get('hostname', '')
-                username = subscription.get('username', '')
+                if username in subscription.keys():
+                    username = subscription.get('username', '')
+                else:
+                    username = ''
                 client = subscription.get('client', '')
                 channel = subscription.get('channel', '')
                 service = subscription.get('service', '')
