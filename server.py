@@ -285,7 +285,7 @@ class tvheadendCollector(object):
             for connection in connections:
                 hostname = connection['peer']
                 typename = connection['type']
-                if 'name' in connection.keys():
+                if 'user' in connection.keys():
                     username = connection['user']
                 else:
                     username = ''
