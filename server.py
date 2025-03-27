@@ -239,7 +239,10 @@ class tvheadendCollector(object):
             for service in services:
                 network_name = service['network']
                 mux_name = service['multiplex']
-                service_name = service['svcname']
+                if 'svcname' in service.keys():
+                    service_name = service['svcname']
+                else:
+                    service_name = ""
 
                 metrics['service_enabled'].add_metric(
                     [network_name, mux_name, service_name], int(service['enabled']))
