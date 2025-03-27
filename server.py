@@ -239,7 +239,10 @@ class tvheadendCollector(object):
             for service in services:
                 network_name = service['network']
                 mux_name = service['multiplex']
-                service_name = service['svcname']
+                if 'svcname' in service.keys():
+                    service_name = service['svcname']
+                else:
+                    service_name = ""
 
                 metrics['service_enabled'].add_metric(
                     [network_name, mux_name, service_name], int(service['enabled']))
@@ -285,7 +288,10 @@ class tvheadendCollector(object):
             for connection in connections:
                 hostname = connection['peer']
                 typename = connection['type']
-                username = connection['user']
+                if 'user' in connection.keys():
+                    username = connection['user']
+                else:
+                    username = ''
                 streaming = connection['streaming']
 
                 metrics['connection_streaming'].add_metric(
@@ -298,7 +304,10 @@ class tvheadendCollector(object):
                 title = subscription['title']
                 state = subscription['state']
                 hostname = subscription.get('hostname', '')
-                username = subscription.get('username', '')
+                if 'username' in subscription.keys():
+                    username = subscription.get('username', '')
+                else:
+                    username = ''
                 client = subscription.get('client', '')
                 channel = subscription.get('channel', '')
                 service = subscription.get('service', '')

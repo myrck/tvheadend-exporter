@@ -14,9 +14,10 @@ Arguments are:
 ```
     --host  default=0.0.0.0 (bind host - 0.0.0.0 to allow outside connections)
     --port default='9429' (bind port i.e. what prometheus scrapes)
-    --username (username for authentication, can be set via ENV Var TVH_USER')
+    --username (username for authentication, can be set via ENV Var TVH_USER)
     --password (password for authentication, can be set via ENV Var TVH_PASS)
-    --server (server url for tvheadend, can be set via ENV Var TVH_SERVER)
+    --server (server IP for tvheadend, can be set via ENV Var TVH_SERVER)
+    --serverport (server port for tvheadend, can be set via ENV Var TVH_PORT)
 ```
 
 <!-- Metrics Exporter -->
