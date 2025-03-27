@@ -48,5 +48,5 @@ jobs:
           tags: |
             docker.io/0x4d4d/tvheadend-exporter:latest
             docker.io/0x4d4d/tvheadend-exporter:${{ steps.tag_release.outputs.tag }}
-            ghcr.io/0x4d4d/tvheadend-exporter:latest
-            ghcr.io/0x4d4d/tvheadend-exporter:${{ steps.tag_release.outputs.tag }}
+            ghcr.io/myrck/tvheadend-exporter:latest
+            ghcr.io/myrck/tvheadend-exporter:${{ steps.tag_release.outputs.tag }}
